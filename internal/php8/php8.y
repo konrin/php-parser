@@ -262,7 +262,7 @@ import (
 %type <node> group_use_declaration inline_use_declaration
 %type <node> use_declaration unprefixed_use_declaration non_empty_unprefixed_use_declarations
 %type <node> unprefixed_use_declarations non_empty_inline_use_declarations inline_use_declarations use_declarations
-%type <node> class_const_decl
+%type <node> class_const_decl class_const_declaration
 %type <node> namespace_name namespace_declaration_name legacy_namespace_name
 %type <node> alt_if_stmt_without_else
 %type <node> array_pair possible_array_pair
@@ -1466,8 +1466,11 @@ class_statement_list:
 class_statement:
         optional_attributes variable_modifiers optional_type_without_static property_list ';'
             { $$ = yylex.(*Parser).builder.NewPropertyList($1, $2, $3, $4, $5) }
-    |   optional_attributes method_modifiers T_CONST class_const_list ';'
-            { $$ = yylex.(*Parser).builder.NewClassConstList($1, $2, $3, $4, $5) }
+    |   optional_attributes method_modifiers T_CONST class_const_declaration ';'
+            {
+                decl := $4.(*ClassConstDeclaration)
+                $$ = yylex.(*Parser).builder.NewClassConstList($1, $2, decl.Type, $3, decl.List, $5)
+            }
     |   optional_attributes method_modifiers T_FUNCTION optional_ref identifier_ex '(' parameter_list ')' optional_return_type method_body
             { $$ = yylex.(*Parser).builder.NewClassMethod($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) }
     |   T_USE name_list trait_adaptations
@@ -1741,6 +1744,22 @@ property:
 class_const_list:
         class_const_list ',' class_const_decl { $$ = yylex.(*Parser).builder.AppendToSeparatedList($1, $2, $3) }
     |   class_const_decl                      { $$ = yylex.(*Parser).builder.NewSeparatedList($1) }
+;
+
+class_const_declaration:
+        class_const_list
+            {
+                $$ = &ClassConstDeclaration{
+                    List: $1,
+                }
+            }
+    |   type_expr_without_static class_const_list
+            {
+                $$ = &ClassConstDeclaration{
+                    Type: $1,
+                    List: $2,
+                }
+            }
 ;
 
 class_const_decl:
@@ -2897,6 +2916,17 @@ class_constant:
                         IdentifierTkn: $3,
                         Value:         $3.Value,
                     },
+                }
+            }
+    |   class_name_or_var T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+            {
+                $$ = &ast.ExprClassConstFetch{
+                    Position: yylex.(*Parser).builder.Pos.NewNodeTokenPosition($1, $5),
+                    Class:               $1,
+                    DoubleColonTkn:      $2,
+                    Const:               $4,
+                    OpenCurlyBracketTkn: $3,
+                    CloseCurlyBracketTkn: $5,
                 }
             }
 ;

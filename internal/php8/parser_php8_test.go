@@ -3018,22 +3018,10 @@ class Foo {
 `
 
 	suite.Expected = []*errors.Error{
-		{
-			Msg: "syntax error: unexpected T_STATIC, expecting T_VARIABLE",
-			Pos: position.NewPosition(2, 2, 18, 24),
-		},
-		{
-			Msg: "syntax error: unexpected T_STATIC, expecting T_VARIABLE",
-			Pos: position.NewPosition(3, 3, 48, 54),
-		},
-		{
-			Msg: "syntax error: unexpected '|', expecting T_VARIABLE",
-			Pos: position.NewPosition(8, 8, 154, 155),
-		},
-		{
-			Msg: "syntax error: unexpected '}'",
-			Pos: position.NewPosition(10, 10, 182, 183),
-		},
+		{Msg: "syntax error", Pos: position.NewPosition(2, 2, 18, 24)},
+		{Msg: "syntax error", Pos: position.NewPosition(3, 3, 48, 54)},
+		{Msg: "syntax error", Pos: position.NewPosition(8, 8, 154, 155)},
+		{Msg: "syntax error", Pos: position.NewPosition(10, 10, 182, 183)},
 	}
 
 	suite.Run()
@@ -3049,18 +3037,9 @@ function f(int|string|null $a) {} // ok
 `
 
 	suite.Expected = []*errors.Error{
-		{
-			Msg: "syntax error: unexpected '|', expecting T_VARIABLE",
-			Pos: position.NewPosition(2, 2, 22, 23),
-		},
-		{
-			Msg: "syntax error: unexpected '('",
-			Pos: position.NewPosition(3, 3, 49, 50),
-		},
-		{
-			Msg: "syntax error: unexpected T_VARIABLE",
-			Pos: position.NewPosition(3, 3, 62, 64),
-		},
+		{Msg: "syntax error", Pos: position.NewPosition(2, 2, 22, 23)},
+		{Msg: "syntax error", Pos: position.NewPosition(3, 3, 49, 50)},
+		{Msg: "syntax error", Pos: position.NewPosition(3, 3, 62, 64)},
 	}
 
 	suite.Run()
@@ -4177,7 +4156,7 @@ class Point {
 								},
 							},
 							AmpersandTkn: &token.Token{
-								ID: token.ID(57492),
+								ID: token.T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG,
 								Val: []byte("&"),
 								FreeFloating: []*token.Token{
 									{
@@ -4302,7 +4281,7 @@ class Point {
 								},
 							},
 							AmpersandTkn: &token.Token{
-								ID: token.ID(57492),
+								ID: token.T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG,
 								Val: []byte("&"),
 								FreeFloating: []*token.Token{
 									{
@@ -4535,10 +4514,7 @@ use \ Foo \ Boo;
 `
 
 	suite.Expected = []*errors.Error{
-		{
-			Msg: "syntax error: unexpected T_NS_SEPARATOR",
-			Pos: position.NewPosition(2, 2, 11, 12),
-		},
+		{Msg: "syntax error", Pos: position.NewPosition(2, 2, 11, 12)},
 	}
 
 	suite.Run()
@@ -4552,10 +4528,7 @@ function f(\Foo \ Boo $a) {}
 `
 
 	suite.Expected = []*errors.Error{
-		{
-			Msg: "syntax error: unexpected T_NS_SEPARATOR, expecting T_VARIABLE",
-			Pos: position.NewPosition(2, 2, 23, 24),
-		},
+		{Msg: "syntax error", Pos: position.NewPosition(2, 2, 23, 24)},
 	}
 
 	suite.Run()

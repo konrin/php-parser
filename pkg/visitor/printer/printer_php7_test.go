@@ -13,7 +13,7 @@ import (
 	"github.com/VKCOM/php-parser/pkg/visitor/printer"
 )
 
-func ExamplePrinter() {
+func Example_printer() {
 	src := `<?php
 
 namespace Foo;

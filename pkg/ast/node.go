@@ -429,6 +429,7 @@ type StmtClassConstList struct {
 	Position      *position.Position
 	AttrGroups    []Vertex
 	Modifiers     []Vertex
+	Type          Vertex
 	ConstTkn      *token.Token
 	Consts        []Vertex
 	SeparatorTkns []*token.Token
@@ -1359,10 +1360,12 @@ func (n *ExprBrackets) GetPosition() *position.Position {
 
 // ExprClassConstFetch node
 type ExprClassConstFetch struct {
-	Position       *position.Position
-	Class          Vertex
-	DoubleColonTkn *token.Token
-	Const          Vertex
+	Position             *position.Position
+	Class                Vertex
+	DoubleColonTkn       *token.Token
+	Const                Vertex
+	OpenCurlyBracketTkn  *token.Token
+	CloseCurlyBracketTkn *token.Token
 }
 
 func (n *ExprClassConstFetch) Accept(v Visitor) {

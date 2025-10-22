@@ -417,6 +417,7 @@ func (v *Dumper) StmtClassConstList(n *ast.StmtClassConstList) {
 	v.dumpPosition(n.Position)
 	v.dumpVertexList("AttrGroups", n.AttrGroups)
 	v.dumpVertexList("Modifiers", n.Modifiers)
+	v.dumpVertex("Type", n.Type)
 	v.dumpToken("ConstTkn", n.ConstTkn)
 	v.dumpVertexList("Consts", n.Consts)
 	v.dumpTokenList("SeparatorTkns", n.SeparatorTkns)
@@ -1203,6 +1204,8 @@ func (v *Dumper) ExprClassConstFetch(n *ast.ExprClassConstFetch) {
 	v.dumpVertex("Class", n.Class)
 	v.dumpToken("DoubleColonTkn", n.DoubleColonTkn)
 	v.dumpVertex("Const", n.Const)
+	v.dumpToken("OpenCurlyBracketTkn", n.OpenCurlyBracketTkn)
+	v.dumpToken("CloseCurlyBracketTkn", n.CloseCurlyBracketTkn)
 
 	v.indent--
 	v.print(v.indent, "},\n")

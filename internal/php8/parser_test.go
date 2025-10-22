@@ -8816,6 +8816,73 @@ func TestStmtClassConstList(t *testing.T) {
 	assert.DeepEqual(t, expected, actual)
 }
 
+func TestStmtClassConstListWithType(t *testing.T) {
+	src := `<? class foo{ public const string FOO = 'bar'; }`
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 3,
+		},
+	}
+	lexer := php8.NewLexer([]byte(src), config)
+	php8parser := php8.NewParser(lexer, config)
+	php8parser.Parse()
+	actual := php8parser.GetRootNode()
+
+	root, ok := actual.(*ast.Root)
+	if !ok {
+		t.Fatalf("expected root node, got %T", actual)
+	}
+	if len(root.Stmts) != 1 {
+		t.Fatalf("expected 1 statement, got %d", len(root.Stmts))
+	}
+
+	classStmt, ok := root.Stmts[0].(*ast.StmtClass)
+	if !ok {
+		t.Fatalf("expected class statement, got %T", root.Stmts[0])
+	}
+	if len(classStmt.Stmts) != 1 {
+		t.Fatalf("expected 1 class stmt, got %d", len(classStmt.Stmts))
+	}
+
+	constList, ok := classStmt.Stmts[0].(*ast.StmtClassConstList)
+	if !ok {
+		t.Fatalf("expected class const list, got %T", classStmt.Stmts[0])
+	}
+
+	if constList.Type == nil {
+		t.Fatalf("expected type for class constant")
+	}
+
+	nameType, ok := constList.Type.(*ast.Name)
+	if !ok {
+		t.Fatalf("expected ast.Name type, got %T", constList.Type)
+	}
+	if len(nameType.Parts) != 1 {
+		t.Fatalf("expected single name part, got %d", len(nameType.Parts))
+	}
+
+	part, ok := nameType.Parts[0].(*ast.NamePart)
+	if !ok {
+		t.Fatalf("expected name part, got %T", nameType.Parts[0])
+	}
+	if string(part.Value) != "string" {
+		t.Fatalf("expected type \"string\", got %q", part.Value)
+	}
+
+	if len(constList.Consts) != 1 {
+		t.Fatalf("expected single constant, got %d", len(constList.Consts))
+	}
+	constant, ok := constList.Consts[0].(*ast.StmtConstant)
+	if !ok {
+		t.Fatalf("expected ast.StmtConstant, got %T", constList.Consts[0])
+	}
+	if ident, ok := constant.Name.(*ast.Identifier); !ok || string(ident.Value) != "FOO" {
+		t.Fatalf("unexpected constant name: %#v", constant.Name)
+	}
+}
+
 func TestStmtClassConstList_WithoutModifiers(t *testing.T) {
 	src := `<? class foo{ const FOO = 1, BAR = 2; }`
 
@@ -36493,6 +36560,53 @@ func TestExprClassConstFetch(t *testing.T) {
 	php8parser.Parse()
 	actual := php8parser.GetRootNode()
 	assert.DeepEqual(t, expected, actual)
+}
+
+func TestExprClassConstFetchDynamic(t *testing.T) {
+	src := `<? Foo::{ $name };`
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 3,
+		},
+	}
+	lexer := php8.NewLexer([]byte(src), config)
+	php8parser := php8.NewParser(lexer, config)
+	php8parser.Parse()
+	actual := php8parser.GetRootNode()
+
+	root, ok := actual.(*ast.Root)
+	if !ok {
+		t.Fatalf("expected root node, got %T", actual)
+	}
+	if len(root.Stmts) != 1 {
+		t.Fatalf("expected 1 statement, got %d", len(root.Stmts))
+	}
+
+	stmt, ok := root.Stmts[0].(*ast.StmtExpression)
+	if !ok {
+		t.Fatalf("expected expression statement, got %T", root.Stmts[0])
+	}
+
+	fetch, ok := stmt.Expr.(*ast.ExprClassConstFetch)
+	if !ok {
+		t.Fatalf("expected class const fetch, got %T", stmt.Expr)
+	}
+
+	if fetch.OpenCurlyBracketTkn == nil || fetch.CloseCurlyBracketTkn == nil {
+		t.Fatalf("expected curly bracket tokens for dynamic class constant fetch")
+	}
+
+	variable, ok := fetch.Const.(*ast.ExprVariable)
+	if !ok {
+		t.Fatalf("expected dynamic expression, got %T", fetch.Const)
+	}
+
+	ident, ok := variable.Name.(*ast.Identifier)
+	if !ok || string(ident.Value) != "$name" {
+		t.Fatalf("unexpected dynamic const expression: %#v", variable.Name)
+	}
 }
 
 func TestExprClassConstFetch_Static(t *testing.T) {

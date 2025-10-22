@@ -69,6 +69,19 @@ func (n *ArgumentList) GetPosition() *position.Position {
 	return n.Position
 }
 
+type ClassConstDeclaration struct {
+	Type ast.Vertex
+	List ast.Vertex
+}
+
+func (n *ClassConstDeclaration) Accept(v ast.Visitor) {
+	// do nothing
+}
+
+func (n *ClassConstDeclaration) GetPosition() *position.Position {
+	return nil
+}
+
 type EnumCaseExpr struct {
 	Position  *position.Position
 	AssignTkn *token.Token

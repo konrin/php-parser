@@ -14,7 +14,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func ExamplePrinterPHP8() {
+func Example_printerPHP8() {
 	src := `<?php
 
 namespace Foo;
@@ -72,7 +72,7 @@ func parsePHP8(src string) ast.Vertex {
 	config := conf.Config{
 		Version: &version.Version{
 			Major: 8,
-			Minor: 1,
+			Minor: 3,
 		},
 	}
 	lexer := php8.NewLexer([]byte(src), config)
@@ -459,6 +459,18 @@ func TestParseAndPrintBooleanNotPHP8(t *testing.T) {
 func TestParseAndPrintClassConstFetchPHP8(t *testing.T) {
 	src := `<?php
 	$var :: CONST ;
+	`
+
+	actual := printPHP8(parsePHP8(src))
+
+	if src != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}
+
+func TestParseAndPrintDynamicClassConstFetchPHP8(t *testing.T) {
+	src := `<?php
+	Foo::{ $name } ;
 	`
 
 	actual := printPHP8(parsePHP8(src))
@@ -2465,6 +2477,20 @@ class Foo {
 	
 	#[\F\Q\N]
 	public const A = 100;
+}
+`
+
+	actual := printPHP8(parsePHP8(src))
+
+	if src != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}
+
+func TestParseAndPrintTypedClassConstPHP8(t *testing.T) {
+	src := `<?php
+class Foo {
+	public const string BAR = 'baz';
 }
 `
 

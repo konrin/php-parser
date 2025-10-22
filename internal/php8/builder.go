@@ -1347,6 +1347,7 @@ func (b *Builder) NewPropertyList(
 func (b *Builder) NewClassConstList(
 	AttrGroups []ast.Vertex,
 	Modifiers []ast.Vertex,
+	Type ast.Vertex,
 	ConstTkn *token.Token,
 	ConstList ast.Vertex,
 	SemiColonTkn *token.Token,
@@ -1365,6 +1366,7 @@ func (b *Builder) NewClassConstList(
 		Position:      pos,
 		AttrGroups:    AttrGroups,
 		Modifiers:     Modifiers,
+		Type:          Type,
 		ConstTkn:      ConstTkn,
 		Consts:        consts,
 		SeparatorTkns: sepTkns,

@@ -1735,6 +1735,34 @@ func TestPrinterPrintExprClassConstFetch(t *testing.T) {
 	}
 }
 
+func TestPrinterPrintExprClassConstFetchDynamic(t *testing.T) {
+	o := bytes.NewBufferString("")
+
+	p := printer.NewPrinter(o).WithState(printer.PrinterStatePHP)
+	n := &ast.ExprClassConstFetch{
+		Class: &ast.Name{
+			Parts: []ast.Vertex{
+				&ast.NamePart{
+					Value: []byte("Foo"),
+				},
+			},
+		},
+		Const: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$name"),
+			},
+		},
+	}
+	n.Accept(p)
+
+	expected := `Foo::{$name}`
+	actual := o.String()
+
+	if expected != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestPrinterPrintExprClone(t *testing.T) {
 	o := bytes.NewBufferString("")
 
@@ -3348,6 +3376,29 @@ func TestPrinterPrintStmtClassConstList(t *testing.T) {
 	n.Accept(p)
 
 	expected := `public const FOO='a',BAR='b';`
+	actual := o.String()
+
+	if expected != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestPrinterPrintStmtClassConstListWithType(t *testing.T) {
+	o := bytes.NewBufferString("")
+
+	p := printer.NewPrinter(o).WithState(printer.PrinterStatePHP)
+	n := &ast.StmtClassConstList{
+		Type: &ast.Identifier{Value: []byte("string")},
+		Consts: []ast.Vertex{
+			&ast.StmtConstant{
+				Name: &ast.Identifier{Value: []byte("FOO")},
+				Expr: &ast.ScalarString{Value: []byte("'a'")},
+			},
+		},
+	}
+	n.Accept(p)
+
+	expected := `const string FOO='a';`
 	actual := o.String()
 
 	if expected != actual {

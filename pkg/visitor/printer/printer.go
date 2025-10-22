@@ -264,6 +264,7 @@ func (p *printer) StmtClassConstList(n *ast.StmtClassConstList) {
 	p.printList(n.AttrGroups)
 	p.printList(n.Modifiers)
 	p.printToken(n.ConstTkn, []byte("const"))
+	p.printNode(n.Type)
 	p.printSeparatedList(n.Consts, n.SeparatorTkns, []byte(","))
 	p.printToken(n.SemiColonTkn, []byte(";"))
 }
@@ -725,6 +726,14 @@ func (p *printer) ExprBrackets(n *ast.ExprBrackets) {
 func (p *printer) ExprClassConstFetch(n *ast.ExprClassConstFetch) {
 	p.printNode(n.Class)
 	p.printToken(n.DoubleColonTkn, []byte("::"))
+	_, isIdentifier := n.Const.(*ast.Identifier)
+	if n.OpenCurlyBracketTkn != nil || n.CloseCurlyBracketTkn != nil || !isIdentifier {
+		p.printToken(n.OpenCurlyBracketTkn, []byte("{"))
+		p.printNode(n.Const)
+		p.printToken(n.CloseCurlyBracketTkn, []byte("}"))
+		return
+	}
+
 	p.printNode(n.Const)
 }
 

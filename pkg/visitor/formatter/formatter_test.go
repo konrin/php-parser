@@ -666,6 +666,39 @@ func TestFormatter_StmtClassConstList_Modifier(t *testing.T) {
 	}
 }
 
+func TestFormatter_StmtClassConstList_Type(t *testing.T) {
+	o := bytes.NewBufferString("")
+
+	n := &ast.StmtClassConstList{
+		Type: &ast.Identifier{
+			Value: []byte("string"),
+		},
+		Consts: []ast.Vertex{
+			&ast.StmtConstant{
+				Name: &ast.Identifier{
+					Value: []byte("foo"),
+				},
+				Expr: &ast.ScalarString{
+					Value: []byte("'foo'"),
+				},
+			},
+		},
+	}
+
+	f := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	n.Accept(f)
+
+	p := printer.NewPrinter(o).WithState(printer.PrinterStatePHP)
+	n.Accept(p)
+
+	expected := `const string foo = 'foo';`
+	actual := o.String()
+
+	if expected != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ClassMethod(t *testing.T) {
 	o := bytes.NewBufferString("")
 
@@ -3449,6 +3482,38 @@ func TestFormatter_ExprClassConstFetch(t *testing.T) {
 	n.Accept(p)
 
 	expected := `$foo::bar`
+	actual := o.String()
+
+	if expected != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_ExprClassConstFetchDynamic(t *testing.T) {
+	o := bytes.NewBufferString("")
+
+	n := &ast.ExprClassConstFetch{
+		Class: &ast.Name{
+			Parts: []ast.Vertex{
+				&ast.NamePart{
+					Value: []byte("Foo"),
+				},
+			},
+		},
+		Const: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$name"),
+			},
+		},
+	}
+
+	f := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	n.Accept(f)
+
+	p := printer.NewPrinter(o).WithState(printer.PrinterStatePHP)
+	n.Accept(p)
+
+	expected := `Foo::{$name}`
 	actual := o.String()
 
 	if expected != actual {

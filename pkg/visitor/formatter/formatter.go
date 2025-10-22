@@ -443,6 +443,11 @@ func (f *formatter) StmtClassConstList(n *ast.StmtClassConstList) {
 	n.ConstTkn = f.newToken(token.T_CONST, []byte("const"))
 	f.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 
+	if n.Type != nil {
+		n.Type.Accept(f)
+		f.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+	}
+
 	n.SeparatorTkns = f.formatList(n.Consts, ',')
 
 	n.SemiColonTkn = f.newSemicolonTkn()
@@ -1252,7 +1257,21 @@ func (f *formatter) ExprBrackets(n *ast.ExprBrackets) {
 func (f *formatter) ExprClassConstFetch(n *ast.ExprClassConstFetch) {
 	n.Class.Accept(f)
 	n.DoubleColonTkn = f.newToken(token.T_PAAMAYIM_NEKUDOTAYIM, []byte("::"))
+	if n.OpenCurlyBracketTkn != nil {
+		n.OpenCurlyBracketTkn = f.newToken('{', []byte("{"))
+		n.Const.Accept(f)
+		n.CloseCurlyBracketTkn = f.newToken('}', []byte("}"))
+		return
+	}
+
+	if _, ok := n.Const.(*ast.Identifier); ok {
+		n.Const.Accept(f)
+		return
+	}
+
+	n.OpenCurlyBracketTkn = f.newToken('{', []byte("{"))
 	n.Const.Accept(f)
+	n.CloseCurlyBracketTkn = f.newToken('}', []byte("}"))
 }
 
 func (f *formatter) ExprClone(n *ast.ExprClone) {

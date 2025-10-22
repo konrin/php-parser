@@ -188,6 +188,7 @@ func (t *Traverser) StmtClassConstList(n *ast.StmtClassConstList) {
 	for _, nn := range n.Modifiers {
 		nn.Accept(t)
 	}
+	t.Traverse(n.Type)
 	for _, nn := range n.Consts {
 		nn.Accept(t)
 	}
